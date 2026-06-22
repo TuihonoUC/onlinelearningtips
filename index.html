@@ -1,0 +1,1374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Learning Tips</title>
+
+    <!-- Google Fonts — common Rise theme fonts for reference:
+         Be Vietnam Pro, Cormorant, DM Sans, Inter, Lato, Lora, Lustria,
+         Maitree, Maven Pro, Merriweather, Montserrat, Open Sans, Poppins,
+         Raleway, Roboto, Roboto Slab -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&amp;family=Merriweather:wght@400;700&amp;display=swap" rel="stylesheet">
+
+    <style>
+        /* === CSS VARIABLES === */
+        :root {
+            /* Typography — change to match your Rise course theme */
+            --heading-font: 'Lato', sans-serif;
+            --body-font: 'Merriweather', serif;
+            --heading-size: 18pt;
+            --body-size: 11pt;
+
+            /* Colours */
+            --primary-color: #007BB2;
+            --primary-hover: #005f8a;
+            --text-color: #333333;
+            --bg-color: #ffffff;
+
+            /* Wheel */
+            --wheel-ring-color: #1a2a3a;
+            --wheel-seg-a: #007BB2;
+            --wheel-seg-b: #1A9AD7;
+            --wheel-seg-seen: #7aafc7;
+            --wheel-seg-current: #e63946;
+            --wheel-hub-stroke: #007BB2;
+
+            /* Indicator/pointer */
+            --pointer-color: #e63946;
+
+            /* Card */
+            --card-accent: #007BB2;
+            --card-bg: #ffffff;
+
+            /* Takeaway */
+            --takeaway-bg: #eef7fd;
+            --takeaway-border: #bee3f8;
+
+            /* Status / tracker */
+            --dot-unseen-bg: #dde3ea;
+            --dot-unseen-text: #8899aa;
+        }
+
+        /* === BASE RESET === */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        /* === RISE IFRAME COMPATIBILITY === */
+        html, body {
+            background-color: transparent;
+            height: auto;
+            min-height: auto;
+        }
+
+        body {
+            font-family: var(--body-font);
+            font-size: var(--body-size);
+            color: var(--text-color);
+            padding: 1.5rem 1rem 2.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        /* === TYPOGRAPHY === */
+        .rise-heading {
+            font-family: var(--heading-font);
+            font-size: var(--heading-size);
+            line-height: 1.2;
+        }
+        .rise-body {
+            font-family: var(--body-font);
+            font-size: var(--body-size);
+            line-height: 1.5;
+        }
+
+        /* === ACCESSIBILITY: FOCUS STATES === */
+        button:focus-visible,
+        input:focus-visible,
+        textarea:focus-visible,
+        select:focus-visible,
+        [tabindex]:focus-visible {
+            outline: 3px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        /* === REDUCED MOTION === */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* === HEADER === */
+        .block-header {
+            text-align: center;
+            margin-bottom: 1.4rem;
+            width: 100%;
+        }
+        .block-title {
+            font-family: var(--heading-font);
+            font-size: 1.55rem;
+            font-weight: 900;
+            color: var(--primary-color);
+            margin-bottom: .25rem;
+        }
+        .block-subtitle {
+            font-family: var(--heading-font);
+            font-size: .88rem;
+            color: #666;
+        }
+
+        /* === PRINT BUTTON (upper right) === */
+        #printBtn {
+            font-family: var(--heading-font);
+            font-size: .76rem;
+            font-weight: 700;
+            background: transparent;
+            color: var(--primary-color);
+            border: 1.5px solid var(--primary-color);
+            border-radius: 2rem;
+            padding: .3rem .95rem;
+            cursor: pointer;
+            min-height: 36px;
+            display: none;
+            transition: background .2s, color .2s;
+            position: absolute;
+            top: 1.25rem;
+            right: 1.25rem;
+        }
+        #printBtn:hover { background: var(--primary-color); color: #fff; }
+
+        /* === WHEEL === */
+        .wheel-wrap {
+            position: relative;
+            width: 380px;
+            height: 380px;
+            margin-bottom: 2rem;
+            overflow: visible;
+            /* CSS filter for shadow — avoids SVG filter clipping at element boundary */
+            filter: drop-shadow(0 8px 18px rgba(0, 0, 0, .26));
+        }
+        #wheelSvg {
+            width: 380px;
+            height: 380px;
+            display: block;
+            overflow: visible;
+        }
+        #wheelSvg.spinnable { cursor: pointer; }
+        #wheelSvg.locked    { cursor: default; }
+
+        /* === POINTER / FLIPPER === */
+        .pointer-wrap {
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            pointer-events: none;
+        }
+        @keyframes flick {
+            0%   { transform: translateX(-50%) rotate(0deg); }
+            35%  { transform: translateX(-50%) rotate(-22deg); }
+            70%  { transform: translateX(-50%) rotate(13deg); }
+            100% { transform: translateX(-50%) rotate(0deg); }
+        }
+        .flick { animation: flick .18s ease; }
+
+        /* === SPIN BUTTON === */
+        #spinBtn {
+            font-family: var(--heading-font);
+            font-weight: 700;
+            font-size: 1rem;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 2rem;
+            padding: .85rem 2.75rem;
+            cursor: pointer;
+            min-height: 50px;
+            min-width: 220px;
+            box-shadow: 0 4px 16px rgba(0, 123, 178, .32);
+            transition: background .2s, transform .1s;
+        }
+        #spinBtn:hover:not(:disabled) { background: var(--primary-hover); }
+        #spinBtn:active:not(:disabled) { transform: translateY(1px); }
+        #spinBtn:disabled { background: #9bb8c9; cursor: not-allowed; box-shadow: none; }
+
+        /* === BUTTON STACK (spin + start over) === */
+        .btn-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: .5rem;
+            margin-bottom: .5rem;
+        }
+        #startOverBtn {
+            display: none;
+            font-family: var(--heading-font);
+            font-weight: 700;
+            font-size: .84rem;
+            background: transparent;
+            color: #999;
+            border: 1.5px solid #ccc;
+            border-radius: 2rem;
+            padding: .5rem 1.4rem;
+            cursor: pointer;
+            min-height: 40px;
+            margin-bottom: .5rem;
+            transition: border-color .2s, color .2s;
+        }
+        #startOverBtn:hover { border-color: #999; color: #666; }
+
+        /* === STATUS LINE === */
+        #status {
+            font-family: var(--heading-font);
+            font-size: .83rem;
+            color: #556;
+            text-align: center;
+            margin-bottom: .85rem;
+            min-height: 1.2rem;
+            width: 100%;
+            max-width: 440px;
+        }
+
+        /* === TRACKER DOTS === */
+        .tracker {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+            max-width: 440px;
+            margin-bottom: 1rem;
+        }
+        .dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--dot-unseen-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--heading-font);
+            font-size: .7rem;
+            font-weight: 700;
+            color: var(--dot-unseen-text);
+            transition: all .25s;
+            cursor: default;
+            border: 2px solid transparent;
+            user-select: none;
+        }
+        .dot.seen { background: var(--primary-color); color: #fff; border-color: var(--primary-hover); cursor: pointer; }
+        .dot.seen:hover { background: var(--primary-hover); }
+        .dot.current { background: var(--wheel-seg-current); color: #fff; border-color: #b5202c; transform: scale(1.18); }
+
+        /* === LANDED CARD WRAPPER — clips slide animation so it can't shift parent layout === */
+        .card-wrap {
+            width: 100%;
+            max-width: 440px;
+            overflow: hidden;
+            margin-bottom: .8rem;
+            padding: 4px 6px 8px 6px;
+        }
+
+        /* === LANDED CARD === */
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(-36px); }
+            to   { opacity: 1; transform: translateX(0); }
+        }
+        #landedCard {
+            max-width: 440px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: 14px;
+            padding: 1rem 1.2rem;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, .1);
+            cursor: pointer;
+            border-left: 5px solid var(--card-accent);
+            display: none;
+            transition: box-shadow .15s;
+        }
+        #landedCard.slide-in { animation: slideInLeft .38s cubic-bezier(.22, .68, 0, 1.2) forwards; }
+        #landedCard:hover { box-shadow: 0 8px 28px rgba(0, 0, 0, .14); }
+        .card-label {
+            font-family: var(--heading-font);
+            font-size: .68rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .09em;
+            margin-bottom: .22rem;
+        }
+        .card-headline {
+            font-family: var(--heading-font);
+            font-size: .98rem;
+            font-weight: 700;
+            color: #1a2a3a;
+            margin-bottom: .22rem;
+            line-height: 1.35;
+        }
+        .card-hint {
+            font-family: var(--body-font);
+            font-size: .74rem;
+            color: #99aabb;
+            font-style: italic;
+        }
+
+        /* === MODAL === */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .65);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 1rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .2s, visibility .2s;
+        }
+        .modal-overlay.open { opacity: 1; visibility: visible; }
+        .modal-box {
+            background: #fff;
+            border-radius: 18px;
+            padding: 2rem;
+            max-width: 560px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            transform: translateY(18px);
+            transition: transform .2s;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .3);
+        }
+        .modal-overlay.open .modal-box { transform: translateY(0); }
+        .modal-x {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: none;
+            border: none;
+            font-size: 1.55rem;
+            cursor: pointer;
+            color: #bbb;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background .15s;
+            line-height: 1;
+            min-height: 36px;
+        }
+        .modal-x:hover { background: #f0f0f0; color: #333; }
+        .m-tipnum {
+            font-family: var(--heading-font);
+            font-size: .7rem;
+            color: var(--primary-color);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            margin-bottom: .3rem;
+        }
+        .m-headline {
+            font-family: var(--heading-font);
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #111;
+            margin-bottom: 1.1rem;
+            line-height: 1.3;
+        }
+        .m-story {
+            border-left: 3px solid #d8edf6;
+            padding-left: 1rem;
+            margin-bottom: 1.1rem;
+        }
+        .story-label {
+            font-family: var(--heading-font);
+            font-size: .63rem;
+            font-weight: 700;
+            color: #99aabb;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            display: block;
+            margin-bottom: .38rem;
+        }
+        .m-story p {
+            font-family: var(--body-font);
+            font-size: .85rem;
+            color: #445;
+            line-height: 1.8;
+            margin-bottom: .55rem;
+        }
+        .m-story p:last-child { margin-bottom: 0; }
+
+        /* Takeaway */
+        #takeawayToggle {
+            font-family: var(--heading-font);
+            font-weight: 700;
+            font-size: .87rem;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 2rem;
+            padding: .6rem 1.5rem;
+            cursor: pointer;
+            min-height: 44px;
+            transition: background .2s;
+            margin-bottom: .55rem;
+        }
+        #takeawayToggle:hover { background: var(--primary-hover); }
+        .takeaway-box {
+            background: var(--takeaway-bg);
+            border: 1px solid var(--takeaway-border);
+            border-radius: 12px;
+            padding: 1rem 1.1rem;
+            display: none;
+            margin-bottom: .8rem;
+        }
+        .takeaway-box.show { display: block; }
+        .takeaway-label {
+            font-family: var(--heading-font);
+            font-size: .63rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            display: block;
+            margin-bottom: .32rem;
+        }
+        .takeaway-box p {
+            font-family: var(--body-font);
+            font-size: .85rem;
+            color: #333;
+            line-height: 1.75;
+        }
+
+        /* Modal actions */
+        .m-actions { display: flex; gap: .7rem; flex-wrap: wrap; margin-top: .2rem; }
+        .btn-pri {
+            font-family: var(--heading-font);
+            font-weight: 700;
+            font-size: .87rem;
+            background: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 2rem;
+            padding: .6rem 1.3rem;
+            cursor: pointer;
+            min-height: 44px;
+            flex: 1;
+            transition: background .2s;
+        }
+        .btn-pri:hover { background: var(--primary-hover); }
+
+        /* === CONFETTI CANVAS === */
+        #confettiCanvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 199;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* === CONGRATS OVERLAY === */
+        #congratsOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, .72);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .3s, visibility .3s;
+        }
+        #congratsOverlay.open { opacity: 1; visibility: visible; }
+        .congrats-box {
+            background: #fff;
+            border-radius: 22px;
+            padding: 2.5rem;
+            text-align: center;
+            max-width: 380px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .4);
+        }
+        .congrats-box .trophy { font-size: 3.5rem; display: block; margin-bottom: .7rem; }
+        .congrats-box h2 {
+            font-family: var(--heading-font);
+            font-size: 1.55rem;
+            color: var(--primary-color);
+            margin-bottom: .45rem;
+        }
+        .congrats-box p {
+            font-family: var(--body-font);
+            font-size: .85rem;
+            color: #555;
+            line-height: 1.7;
+            margin-bottom: 1.3rem;
+        }
+        .congrats-box .btn-pri { flex: none; min-width: 160px; }
+
+        /* === RESPONSIVE === */
+        @media (max-width: 520px) {
+            .wheel-wrap, #wheelSvg { width: 300px; height: 300px; }
+            .block-title { font-size: 1.25rem; }
+            #spinBtn { min-width: 180px; }
+        }
+        @media (max-width: 360px) {
+            .wheel-wrap, #wheelSvg { width: 260px; height: 260px; }
+        }
+    </style>
+</head>
+<body class="rise-body">
+<main id="app">
+
+    <!-- Print Tips — upper right, visible once first tip is seen -->
+    <button id="printBtn" aria-label="Print seen tips">Print Tips</button>
+
+    <!-- Header -->
+    <header class="block-header">
+        <h1 class="block-title" id="appTitle">Spinner Wheel</h1>
+        <p class="block-subtitle" id="appSubtitle">Spin to reveal a tip — click the card to read the full story.</p>
+    </header>
+
+    <!-- Wheel -->
+    <div class="wheel-wrap">
+        <div class="pointer-wrap" id="pointerWrap" aria-hidden="true">
+            <svg width="28" height="32" viewBox="0 0 28 32"
+                 style="filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))">
+                <polygon points="14,2 27,30 1,30" fill="#e63946" stroke="#fff" stroke-width="2.5"/>
+            </svg>
+        </div>
+        <svg id="wheelSvg" viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg"
+             role="button" tabindex="0" aria-label="Spin the wheel">
+            <circle cx="190" cy="190" r="188" fill="#1a2a3a"/>
+            <g id="wheelG" style="transform-origin:190px 190px"></g>
+            <circle cx="190" cy="190" r="32" fill="#fff" stroke="#007BB2" stroke-width="3.5"/>
+            <text x="190" y="194" text-anchor="middle" dominant-baseline="middle"
+                  font-family="Lato,sans-serif" font-size="10" font-weight="700" fill="#007BB2">SPIN</text>
+        </svg>
+    </div>
+
+    <!-- Spin button -->
+    <div class="btn-stack">
+        <button id="spinBtn">🎯 Spin the Wheel</button>
+        <button id="startOverBtn">Start Over</button>
+    </div>
+
+    <!-- Status message -->
+    <div id="status" role="status" aria-live="polite"></div>
+
+    <!-- Tracker dots -->
+    <div class="tracker" id="tracker" role="group" aria-label="Tip progress"></div>
+
+    <!-- Landed tip card -->
+    <div class="card-wrap">
+        <div id="landedCard" tabindex="0" role="button" aria-label="Open tip">
+        <div class="card-label" id="cardNum"></div>
+        <div class="card-headline" id="cardHeadline"></div>
+        <div class="card-hint">Click to read the full story →</div>
+        </div>
+    </div>
+
+    <!-- Tip modal -->
+    <div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="mHeadline">
+        <div class="modal-box">
+            <button class="modal-x" id="modalX" aria-label="Close dialog">×</button>
+            <div class="m-tipnum" id="mTipNum"></div>
+            <h2 class="m-headline" id="mHeadline" tabindex="-1"></h2>
+            <div class="m-story">
+                <span class="story-label">The Story</span>
+                <div id="mStory"></div>
+            </div>
+            <div id="takeawayWrap">
+                <button id="takeawayToggle">💡 Show Takeaway</button>
+                <div class="takeaway-box" id="takeawayBox" role="region" aria-label="Takeaway">
+                    <span class="takeaway-label">Takeaway</span>
+                    <p id="takeawayText"></p>
+                </div>
+            </div>
+            <div class="m-actions">
+                <button class="btn-pri" id="closeBtn" style="display:none">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confetti canvas -->
+    <canvas id="confettiCanvas" aria-hidden="true"></canvas>
+
+    <!-- Congrats overlay -->
+    <div id="congratsOverlay" role="dialog" aria-modal="true" aria-labelledby="congratsH">
+        <div class="congrats-box">
+            <span class="trophy" aria-hidden="true">🏆</span>
+            <h2 id="congratsH">All Tips Unlocked!</h2>
+            <p id="congratsMsg">You've explored every tip. Well done!</p>
+            <button class="btn-pri" id="continueBtn">Continue</button>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    /* =========================================================
+       CONFIGURATION — Edit values here. Do not edit code below.
+       ========================================================= */
+    const CONFIG = {
+        // --- Identity ---
+        APP_TITLE: 'Online Learning Tips',
+        APP_SUBTITLE: 'Spin to reveal a research-backed tip — click the card to read more.',
+
+        // --- Typography — must match fonts loaded in <head> ---
+        HEADING_FONT: 'Lato',
+        BODY_FONT: 'Merriweather',
+
+        // --- Theme ---
+        PRIMARY_COLOR: '#007BB2',
+        PRIMARY_HOVER: '#005f8a',
+
+        // --- Wheel colours ---
+        WHEEL_RING_COLOR: '#1a2a3a',       // outer ring
+        WHEEL_SEG_A: '#007BB2',             // alternating segment colour A
+        WHEEL_SEG_B: '#1A9AD7',             // alternating segment colour B
+        WHEEL_SEG_SEEN: '#7aafc7',          // colour of already-seen segments
+        WHEEL_SEG_CURRENT: '#e63946',       // colour of the currently landed segment
+
+        // --- Spin behaviour ---
+        MAX_SPINS: 0,                       // 0 = unlimited; set e.g. 5 to cap at 5 spins
+
+        // --- Features ---
+        SHOW_TAKEAWAY_BUTTON: true,         // show/hide the Takeaway reveal button in modal
+        SHOW_PRINT_BUTTON: true,            // show/hide the Print Tips button
+        SHOW_CONGRATS: true,                // show/hide the all-tips-seen celebration screen
+        SOUND_ENABLED: true,                // enable tick and landing sound effects
+
+        // --- Congrats screen ---
+        CONGRATS_TITLE: 'All Tips Unlocked!',
+        CONGRATS_MESSAGE: 'You\'ve explored every online learning tip. Keep building the habits that make study work.',
+
+        // --- Rise completion ---
+        // Fires once on first spin to signal engagement
+        RISE_COMPLETION: true,
+        COMPLETION_TRIGGER: 'onFirstSpin',
+
+        // --- Print ---
+        SHOW_PRINT_BUTTON: true,
+        PRINT_INSTRUCTIONS: 'Use your browser\'s Print feature (Ctrl+P / Cmd+P) to save or print.',
+
+        // --- Storage —— change INSTANCE_ID if using multiple wheels in one course ---
+        INSTANCE_ID: 1,
+        STORAGE_KEY_PREFIX: 'rise_spinner_',
+
+        // --- Tips content ---
+        // Each tip: { num, headline, story, takeaway }
+        // story: use \n\n to separate paragraphs
+        TIPS: [
+            {
+                num: 1,
+                headline: "Put study time on the calendar.",
+                story: "Online learning feels flexible, which is exactly why it needs structure. Without a class bell or commute, study can quietly slide behind work, family, messages, and everything else asking for attention.\n\nSuccessful online learners tend to act like self-regulated learners: they plan, monitor, and adjust. The first move is simple. Decide when learning will happen before the week starts pushing back.",
+                takeaway: "At the start of each week, book your study blocks, assessment time, and one catch-up buffer. If it is not on your calendar, it is still only a good intention."
+            },
+            {
+                num: 2,
+                headline: "Set up your learning zone before you need it.",
+                story: "A poor study setup turns small tasks into friction. The video buffers. The charger is in another room. The notes are in the wrong folder. A five-minute job becomes a reason to stop.\n\nYour learning space does not need to be fancy. It needs to reduce decisions. Same place when possible, same materials ready, same routine for opening the course and getting started.",
+                takeaway: "Before each session, check your internet, charger, headphones, notes, and course login. Close unrelated tabs and put your phone where it cannot keep negotiating with you."
+            },
+            {
+                num: 3,
+                headline: "Start each week with a course map.",
+                story: "Online courses often hide work in several places: modules, announcements, readings, quizzes, discussion boards, and assignment folders. It is easy to miss something because nothing looks urgent yet.\n\nA weekly scan gives you control. You are not doing the work yet. You are turning the course from a maze into a list you can actually manage.",
+                takeaway: "Make a weekly map with four headings: watch, read, do, and submit. Add due dates, estimated time, and one question to ask if anything is unclear."
+            },
+            {
+                num: 4,
+                headline: "Do not just re-watch. Retrieve.",
+                story: "Re-watching a lecture can feel productive because the material looks familiar. Familiar is not the same as remembered.\n\nResearch on retrieval practice shows that pulling ideas from memory helps learning stick better than simply looking back over notes. After a video or reading, close the source and make your brain do some of the work.",
+                takeaway: "After each lesson, write three key ideas from memory, then check what you missed. Turn headings into questions and answer them without looking first."
+            },
+            {
+                num: 5,
+                headline: "Space practice across the week.",
+                story: "Cramming can help you recognise material tomorrow. It is much weaker for remembering, applying, and building on that material later.\n\nSpacing works because forgetting a little makes recall more useful. Short sessions spread over days usually beat one long session right before the deadline.",
+                takeaway: "Replace one marathon session with several shorter ones. Review new material after a delay, then return to older material before it disappears completely."
+            },
+            {
+                num: 6,
+                headline: "Make notes that force thinking.",
+                story: "Typing every word from a slide feels safe, but it often leaves you with a transcript instead of understanding. Good notes are not a copy of the course. They are evidence that you processed it.\n\nPause the video. Summarise in your own words. Add an example. Sketch a process. Mark the place where your understanding gets fuzzy.",
+                takeaway: "Use notes to answer: what is the main idea, how does it connect to what I already know, and where could I use this?"
+            },
+            {
+                num: 7,
+                headline: "Show up where the people are.",
+                story: "Online learning can feel like studying alone in a quiet room, but learning is still social. Research on online courses links interaction and support with stronger engagement and outcomes.\n\nYou do not need to post constantly. You do need to become visible enough that questions, examples, and encouragement can reach you.",
+                takeaway: "Each week, make one useful connection: reply to a classmate, ask a question, attend a session, join a study chat, or send your instructor a focused message."
+            },
+            {
+                num: 8,
+                headline: "Ask for help while the problem is small.",
+                story: "Confusion compounds. A small question on Tuesday can become a missing assignment by Sunday night.\n\nGood help-seeking is a learning strategy, not a last resort. It works best when you show what you tried, where you got stuck, and what kind of help would move you forward.",
+                takeaway: "Use this message structure: I tried this, I got stuck here, I think the issue is this, and I need help with this next step."
+            },
+            {
+                num: 9,
+                headline: "Check understanding before the assessment does.",
+                story: "Completing a module is not proof that you can use what was in it. The real test is whether you can explain, apply, compare, or solve without the answer sitting in front of you.\n\nBuild tiny checks into your routine so feedback arrives early, when you can still adjust your strategy.",
+                takeaway: "Before submitting or moving on, explain the topic aloud, answer a practice question, teach it to someone, or write the mistake you are most likely to make."
+            },
+            {
+                num: 10,
+                headline: "Protect the body that does the learning.",
+                story: "Online study can expand into every spare hour if you let it. That is not commitment. That is a fast way to make attention, memory, and motivation harder to access.\n\nSleep, breaks, movement, food, and boundaries are not extras around learning. They are part of the system that makes learning possible.",
+                takeaway: "Plan recovery as deliberately as study. Stop before every session becomes a late-night catch-up, and use short breaks to reset attention before it collapses."
+            }
+        ]
+    };
+
+    /* =========================================================
+       APPLICATION LOGIC — Do not edit below this line.
+       ========================================================= */
+
+    // --- Constants ---
+    const STORAGE_KEY = CONFIG.STORAGE_KEY_PREFIX + CONFIG.INSTANCE_ID;
+    const N = CONFIG.TIPS.length;
+    const SEG_DEG = 360 / N;
+    const CX = 190, CY = 190, R = 178;
+
+    // --- Runtime state ---
+    let seenTips      = new Set();
+    let currentTip    = null;
+    let spinning      = false;
+    let currentDeg    = 0;
+    let spinCount     = 0;
+    let lastFocused   = null;
+    let audioCtx      = null;
+    let confId        = null;
+    let tipViewed     = true;    // false = must open modal before re-spinning
+    let congratsShown = false;   // congrats fires only once per cycle
+    let completionSent = false;  // Rise completion fires once
+
+    /* -----------------------------------------------------------
+       applyConfig — syncs CONFIG values to :root CSS variables
+       and updates any DOM text driven by CONFIG
+    ----------------------------------------------------------- */
+    function applyConfig() {
+        const root = document.documentElement.style;
+        root.setProperty('--heading-font',      `'${CONFIG.HEADING_FONT}', sans-serif`);
+        root.setProperty('--body-font',         `'${CONFIG.BODY_FONT}', serif`);
+        root.setProperty('--primary-color',     CONFIG.PRIMARY_COLOR);
+        root.setProperty('--primary-hover',     CONFIG.PRIMARY_HOVER);
+        root.setProperty('--wheel-ring-color',  CONFIG.WHEEL_RING_COLOR);
+        root.setProperty('--wheel-seg-a',       CONFIG.WHEEL_SEG_A);
+        root.setProperty('--wheel-seg-b',       CONFIG.WHEEL_SEG_B);
+        root.setProperty('--wheel-seg-seen',    CONFIG.WHEEL_SEG_SEEN);
+        root.setProperty('--wheel-seg-current', CONFIG.WHEEL_SEG_CURRENT);
+        root.setProperty('--card-accent',       CONFIG.PRIMARY_COLOR);
+        root.setProperty('--wheel-hub-stroke',  CONFIG.PRIMARY_COLOR);
+
+        document.title = CONFIG.APP_TITLE;
+        const titleEl = document.getElementById('appTitle');
+        if (titleEl) titleEl.textContent = CONFIG.APP_TITLE;
+        const subEl = document.getElementById('appSubtitle');
+        if (subEl) subEl.textContent = CONFIG.APP_SUBTITLE;
+
+        // Sync wheel ring colour directly into SVG
+        const ring = document.querySelector('#wheelSvg > circle');
+        if (ring) ring.setAttribute('fill', CONFIG.WHEEL_RING_COLOR);
+
+        // Sync wheel hub stroke
+        const hub = document.querySelectorAll('#wheelSvg circle')[1];
+        if (hub) hub.setAttribute('stroke', CONFIG.PRIMARY_COLOR);
+        const hubText = document.querySelector('#wheelSvg text');
+        if (hubText) hubText.setAttribute('fill', CONFIG.PRIMARY_COLOR);
+
+        // Sync pointer colour
+        const pointer = document.querySelector('.pointer-wrap polygon');
+        if (pointer) pointer.setAttribute('fill', CONFIG.WHEEL_SEG_CURRENT);
+
+        // Congrats copy
+        const ctitle = document.getElementById('congratsH');
+        if (ctitle) ctitle.textContent = CONFIG.CONGRATS_TITLE;
+        const cmsg = document.getElementById('congratsMsg');
+        if (cmsg) cmsg.textContent = CONFIG.CONGRATS_MESSAGE;
+
+        // Print button visibility controlled by showLandedCard; hide initially
+        if (!CONFIG.SHOW_PRINT_BUTTON) {
+            document.getElementById('printBtn').style.display = 'none';
+        }
+    }
+
+    /* -----------------------------------------------------------
+       notifyRiseHeight — reports content height to Rise parent
+    ----------------------------------------------------------- */
+    function notifyRiseHeight() {
+        const height = document.documentElement.scrollHeight;
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage({ type: 'setHeight', height }, '*');
+        }
+    }
+    window.addEventListener('load', notifyRiseHeight);
+    new ResizeObserver(notifyRiseHeight).observe(document.body);
+
+    /* -----------------------------------------------------------
+       sendRiseCompletion — fires once on first spin
+    ----------------------------------------------------------- */
+    function sendRiseCompletion() {
+        if (completionSent || !CONFIG.RISE_COMPLETION) return;
+        try {
+            window.parent.postMessage({ type: 'complete' }, '*');
+        } catch (e) { /* silent — may not be in iframe */ }
+        completionSent = true;
+    }
+
+    /* -----------------------------------------------------------
+       Storage helpers
+    ----------------------------------------------------------- */
+    function safeGetItem(key) {
+        try { return localStorage.getItem(key); } catch (e) { return null; }
+    }
+    function safeSetItem(key, value) {
+        try { localStorage.setItem(key, value); return true; } catch (e) { return false; }
+    }
+    function loadState() {
+        const raw = safeGetItem(STORAGE_KEY);
+        if (!raw) return;
+        try {
+            const d = JSON.parse(raw);
+            seenTips  = new Set(d.seen  || []);
+            spinCount = d.spins || 0;
+        } catch (e) {}
+    }
+    function saveState() {
+        safeSetItem(STORAGE_KEY, JSON.stringify({ seen: [...seenTips], spins: spinCount }));
+    }
+
+    /* -----------------------------------------------------------
+       Wheel drawing (SVG)
+    ----------------------------------------------------------- */
+    function polarToXY(angleDeg, radius) {
+        const rad = angleDeg * Math.PI / 180;
+        return { x: CX + radius * Math.cos(rad), y: CY + radius * Math.sin(rad) };
+    }
+
+    function buildWheel() {
+        const g = document.getElementById('wheelG');
+        g.innerHTML = '';
+
+        for (let i = 0; i < N; i++) {
+            const a0 = -90 + i * SEG_DEG;
+            const a1 = a0 + SEG_DEG;
+            const p0 = polarToXY(a0, R);
+            const p1 = polarToXY(a1, R);
+            const labelAngle = a0 + SEG_DEG / 2;
+            const mid = polarToXY(labelAngle, R * 0.65);
+            const seen = seenTips.has(i);
+            const cur  = i === currentTip;
+            const fill = cur  ? CONFIG.WHEEL_SEG_CURRENT
+                       : seen ? CONFIG.WHEEL_SEG_SEEN
+                       : (i % 2 === 0 ? CONFIG.WHEEL_SEG_A : CONFIG.WHEEL_SEG_B);
+
+            // Segment path
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', `M${CX},${CY} L${p0.x},${p0.y} A${R},${R} 0 0,1 ${p1.x},${p1.y} Z`);
+            path.setAttribute('fill', fill);
+            path.setAttribute('stroke', 'rgba(255,255,255,.7)');
+            path.setAttribute('stroke-width', '2');
+            g.appendChild(path);
+
+            // Tip number label
+            const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            txt.setAttribute('x', mid.x);
+            txt.setAttribute('y', mid.y);
+            txt.setAttribute('text-anchor', 'middle');
+            txt.setAttribute('dominant-baseline', 'middle');
+            txt.setAttribute('font-family', `${CONFIG.HEADING_FONT},sans-serif`);
+            txt.setAttribute('font-size', N > 8 ? '11' : '13');
+            txt.setAttribute('font-weight', '700');
+            txt.setAttribute('fill', seen && !cur ? 'rgba(255,255,255,.45)' : '#fff');
+            txt.setAttribute('transform', `rotate(${labelAngle},${mid.x},${mid.y})`);
+            txt.setAttribute('pointer-events', 'none');
+            txt.textContent = `TIP ${i + 1}`;
+            g.appendChild(txt);
+
+            // Checkmark on seen segments
+            if (seen && !cur) {
+                const ck = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                const cp = polarToXY(labelAngle, R * 0.36);
+                ck.setAttribute('x', cp.x); ck.setAttribute('y', cp.y);
+                ck.setAttribute('text-anchor', 'middle'); ck.setAttribute('dominant-baseline', 'middle');
+                ck.setAttribute('font-size', '16'); ck.setAttribute('fill', 'rgba(255,255,255,.55)');
+                ck.setAttribute('pointer-events', 'none');
+                ck.textContent = '✓';
+                g.appendChild(ck);
+            }
+        }
+    }
+
+    function applyRotation(deg) {
+        document.getElementById('wheelG').style.transform = `rotate(${deg}deg)`;
+    }
+
+    /* -----------------------------------------------------------
+       Spin logic
+    ----------------------------------------------------------- */
+    function segAtAngle(deg) {
+        const mod = ((deg % 360) + 360) % 360;
+        return Math.floor(((360 - mod) % 360) / SEG_DEG) % N;
+    }
+
+    function pickTarget() {
+        if (seenTips.size >= N) return null;
+        const unseen = Array.from({ length: N }, (_, i) => i).filter(i => !seenTips.has(i));
+        return unseen[Math.floor(Math.random() * unseen.length)];
+    }
+
+    function angleForSeg(seg) {
+        return (360 - ((seg + 0.5) * SEG_DEG) % 360) % 360;
+    }
+
+    function lockSpin() {
+        tipViewed = false;
+        document.getElementById('spinBtn').disabled = true;
+        document.getElementById('wheelSvg').classList.remove('spinnable');
+        document.getElementById('wheelSvg').classList.add('locked');
+        document.getElementById('wheelSvg').setAttribute('aria-label', 'Read the tip card below before spinning again');
+    }
+    function unlockSpin() {
+        tipViewed = true;
+        const allSeen = seenTips.size >= N;
+        document.getElementById('spinBtn').disabled = allSeen;
+        if (!allSeen) {
+            document.getElementById('wheelSvg').classList.remove('locked');
+            document.getElementById('wheelSvg').classList.add('spinnable');
+            document.getElementById('wheelSvg').setAttribute('aria-label', 'Spin the wheel');
+        }
+    }
+
+    function doSpin() {
+        if (spinning || !tipViewed) return;
+        if (CONFIG.MAX_SPINS > 0 && spinCount >= CONFIG.MAX_SPINS) {
+            setStatus('Maximum spins reached.');
+            return;
+        }
+        const target = pickTarget();
+        if (target === null) return;
+
+        spinning = true;
+        currentTip = null;
+        hideLandedCard();
+        document.getElementById('spinBtn').disabled = true;
+        unlockAudio();
+
+        if (CONFIG.COMPLETION_TRIGGER === 'onFirstSpin') sendRiseCompletion();
+
+        const targetAngle = angleForSeg(target);
+        const cur = currentDeg % 360;
+        let extra = (targetAngle - cur + 360) % 360;
+        if (extra < 30) extra += 360;
+        const totalRot = currentDeg + extra + (4 + Math.floor(Math.random() * 4)) * 360;
+        const dur = 4200 + Math.random() * 1200;
+        const from = currentDeg;
+        const t0 = performance.now();
+        let lastSeg = -1;
+
+        function frame(now) {
+            const p = Math.min((now - t0) / dur, 1);
+            const ease = 1 - Math.pow(1 - p, 3);
+            const rot = from + (totalRot - from) * ease;
+            applyRotation(rot);
+            const s = segAtAngle(rot);
+            if (s !== lastSeg) { playTick(); flickPointer(); }
+            lastSeg = s;
+            if (p < 1) { requestAnimationFrame(frame); return; }
+
+            // Spin complete
+            currentDeg = totalRot;
+            currentTip = target;
+            seenTips.add(target);
+            spinCount++;
+            spinning = false;
+            saveState();
+            buildWheel();
+            updateDots();
+            setStatus();
+            showLandedCard(target);
+            flickPointer();
+            playLand();
+            lockSpin();
+        }
+        requestAnimationFrame(frame);
+    }
+
+    /* -----------------------------------------------------------
+       Audio (Web Audio API — no external files)
+    ----------------------------------------------------------- */
+    function unlockAudio() {
+        if (!audioCtx) {
+            try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {}
+        }
+    }
+    function playTick() {
+        if (!CONFIG.SOUND_ENABLED || !audioCtx) return;
+        try {
+            const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+            o.connect(g); g.connect(audioCtx.destination);
+            o.frequency.value = 550 + Math.random() * 450; o.type = 'triangle';
+            g.gain.setValueAtTime(.09, audioCtx.currentTime);
+            g.gain.exponentialRampToValueAtTime(.001, audioCtx.currentTime + .065);
+            o.start(); o.stop(audioCtx.currentTime + .065);
+        } catch (e) {}
+    }
+    function playLand() {
+        if (!CONFIG.SOUND_ENABLED || !audioCtx) return;
+        [523, 659, 784].forEach((f, i) => {
+            try {
+                const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+                o.connect(g); g.connect(audioCtx.destination);
+                o.frequency.value = f; o.type = 'sine';
+                const t = audioCtx.currentTime + i * .13;
+                g.gain.setValueAtTime(0, t);
+                g.gain.linearRampToValueAtTime(.16, t + .03);
+                g.gain.exponentialRampToValueAtTime(.001, t + .28);
+                o.start(t); o.stop(t + .3);
+            } catch (e) {}
+        });
+    }
+
+    /* -----------------------------------------------------------
+       Pointer flick animation
+    ----------------------------------------------------------- */
+    function flickPointer() {
+        const p = document.getElementById('pointerWrap');
+        p.classList.remove('flick'); void p.offsetWidth; p.classList.add('flick');
+        p.addEventListener('animationend', () => p.classList.remove('flick'), { once: true });
+    }
+
+    /* -----------------------------------------------------------
+       Status line
+    ----------------------------------------------------------- */
+    function setStatus(msg) {
+        const el = document.getElementById('status');
+        if (msg) { el.textContent = msg; return; }
+        if (seenTips.size === 0) { el.textContent = 'Spin to discover your first tip!'; return; }
+        if (seenTips.size === N) { el.textContent = "🎉 You've seen all tips!"; return; }
+        if (CONFIG.MAX_SPINS > 0) {
+            el.textContent = `${seenTips.size} of ${N} tips seen • ${CONFIG.MAX_SPINS - spinCount} spins remaining`;
+        } else {
+            el.textContent = `${seenTips.size} of ${N} tips seen`;
+        }
+    }
+
+    /* -----------------------------------------------------------
+       Tracker dots
+    ----------------------------------------------------------- */
+    function updateDots() {
+        const c = document.getElementById('tracker');
+        c.innerHTML = '';
+        CONFIG.TIPS.forEach((t, i) => {
+            const d = document.createElement('div');
+            d.className = 'dot' + (seenTips.has(i) ? ' seen' : '') + (i === currentTip ? ' current' : '');
+            d.textContent = i + 1;
+            d.title = seenTips.has(i) ? t.headline : 'Not yet seen';
+            if (seenTips.has(i)) {
+                d.setAttribute('tabindex', '0');
+                d.setAttribute('role', 'button');
+                d.setAttribute('aria-label', `Review tip ${i + 1}: ${t.headline}`);
+                d.addEventListener('click', () => openModal(i));
+                d.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(i); } });
+            }
+            c.appendChild(d);
+        });
+    }
+
+    /* -----------------------------------------------------------
+       Landed tip card
+    ----------------------------------------------------------- */
+    function showLandedCard(i) {
+        const t = CONFIG.TIPS[i];
+        document.getElementById('cardNum').textContent = `TIP ${t.num}`;
+        document.getElementById('cardHeadline').textContent = t.headline;
+        const card = document.getElementById('landedCard');
+        card.classList.remove('slide-in');
+        card.style.display = 'block';
+        void card.offsetWidth; // force reflow for animation restart
+        card.classList.add('slide-in');
+        card.setAttribute('aria-label', `Tip ${t.num}: ${t.headline} — click to read`);
+        card.onclick = () => openModal(i);
+        card.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(i); } };
+        if (CONFIG.SHOW_PRINT_BUTTON) document.getElementById('printBtn').style.display = 'inline-block';
+        setStatus('👆 Click the card below to read this tip — then spin again.');
+        notifyRiseHeight();
+    }
+    function hideLandedCard() {
+        document.getElementById('landedCard').style.display = 'none';
+        document.getElementById('landedCard').classList.remove('slide-in');
+    }
+
+    /* -----------------------------------------------------------
+       Modal — open / close
+    ----------------------------------------------------------- */
+    function openModal(i) {
+        const t = CONFIG.TIPS[i];
+        lastFocused = document.activeElement;
+        document.getElementById('mTipNum').textContent   = `TIP ${t.num} OF ${N}`;
+        document.getElementById('mHeadline').textContent = t.headline;
+        // escapeHtml applied via innerHTML construction
+        document.getElementById('mStory').innerHTML = t.story
+            .split('\n\n')
+            .map(p => `<p>${escapeHtml(p)}</p>`)
+            .join('');
+        document.getElementById('takeawayText').textContent = t.takeaway;
+        document.getElementById('takeawayBox').classList.remove('show');
+        document.getElementById('closeBtn').style.display = 'none';
+        // Show takeaway button or skip straight to close if disabled
+        if (CONFIG.SHOW_TAKEAWAY_BUTTON) {
+            document.getElementById('takeawayToggle').style.display = 'inline-block';
+        } else {
+            document.getElementById('takeawayToggle').style.display = 'none';
+            document.getElementById('closeBtn').style.display = 'block';
+        }
+        document.getElementById('modal').classList.add('open');
+        setTimeout(() => document.getElementById('mHeadline').focus(), 50);
+    }
+
+    function closeModal() {
+        document.getElementById('modal').classList.remove('open');
+        document.getElementById('takeawayBox').classList.remove('show');
+        if (lastFocused) lastFocused.focus();
+        unlockSpin();
+        setStatus();
+        // Fire congrats only once, after the last tip's modal is closed
+        if (seenTips.size === N && CONFIG.SHOW_CONGRATS && !congratsShown) {
+            setTimeout(showCongrats, 400);
+        }
+    }
+
+    /* -----------------------------------------------------------
+       Congrats overlay
+    ----------------------------------------------------------- */
+    function showCongrats() {
+        congratsShown = true;
+        document.getElementById('congratsOverlay').classList.add('open');
+        startConfetti();
+        setTimeout(() => document.getElementById('continueBtn').focus(), 50);
+    }
+    function hideCongrats() {
+        document.getElementById('congratsOverlay').classList.remove('open');
+        stopConfetti();
+        document.getElementById('startOverBtn').style.display = 'block';
+        document.getElementById('spinBtn').focus();
+        notifyRiseHeight();
+    }
+
+    /* -----------------------------------------------------------
+       Reset / Start Over
+    ----------------------------------------------------------- */
+    function resetAll() {
+        seenTips = new Set(); currentTip = null; spinCount = 0; currentDeg = 0;
+        congratsShown = false;
+        saveState();
+        hideLandedCard();
+        document.getElementById('startOverBtn').style.display = 'none';
+        if (!CONFIG.SHOW_PRINT_BUTTON) document.getElementById('printBtn').style.display = 'none';
+        buildWheel(); updateDots(); applyRotation(0);
+        unlockSpin();
+        setStatus('Spin to discover your first tip!');
+        notifyRiseHeight();
+    }
+
+    /* -----------------------------------------------------------
+       Confetti (canvas-based, no CDN)
+    ----------------------------------------------------------- */
+    function startConfetti() {
+        const cc = document.getElementById('confettiCanvas');
+        cc.width = window.innerWidth; cc.height = window.innerHeight;
+        const pieces = [];
+        const clrs = [CONFIG.PRIMARY_COLOR, '#e63946', '#FFD700', '#4AADDB', '#2ecc71', '#ff6b35'];
+        for (let i = 0; i < 140; i++) {
+            pieces.push({
+                x: Math.random() * cc.width, y: -10 - Math.random() * 180,
+                w: 6 + Math.random() * 8, h: 4 + Math.random() * 5,
+                c: clrs[~~(Math.random() * clrs.length)],
+                vx: (Math.random() - .5) * 4, vy: 2 + Math.random() * 3.5,
+                r: Math.random() * 360, rv: (Math.random() - .5) * 7
+            });
+        }
+        const ctx = cc.getContext('2d');
+        function draw() {
+            ctx.clearRect(0, 0, cc.width, cc.height);
+            pieces.forEach(p => {
+                p.x += p.vx; p.y += p.vy; p.r += p.rv; p.vy += .07;
+                if (p.y > cc.height + 20) { p.y = -10; p.x = Math.random() * cc.width; p.vy = 2 + Math.random() * 3; }
+                ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r * Math.PI / 180);
+                ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+                ctx.restore();
+            });
+            confId = requestAnimationFrame(draw);
+        }
+        draw();
+    }
+    function stopConfetti() {
+        if (confId) cancelAnimationFrame(confId);
+        const cc = document.getElementById('confettiCanvas');
+        cc.getContext('2d').clearRect(0, 0, cc.width, cc.height);
+    }
+
+    /* -----------------------------------------------------------
+       Print — opens a new tab and triggers browser print dialog
+    ----------------------------------------------------------- */
+    function printContent() {
+        const arr = [...seenTips].sort((a, b) => a - b);
+        if (!arr.length) return;
+
+        const styles = getComputedStyle(document.documentElement);
+        const hFont = styles.getPropertyValue('--heading-font').trim();
+        const bFont = styles.getPropertyValue('--body-font').trim();
+
+        const contentHtml = arr.map(i => {
+            const t = CONFIG.TIPS[i];
+            return `<div style="margin-bottom:2rem;page-break-inside:avoid">
+                <div style="font-size:.7rem;color:#007BB2;font-weight:700;text-transform:uppercase;letter-spacing:.08em">TIP ${t.num}</div>
+                <h2 style="font-family:Arial,sans-serif;font-size:1.05rem;margin:.25rem 0 .7rem">${escapeHtml(t.headline)}</h2>
+                <div style="border-left:3px solid #dde3ea;padding-left:.9rem;margin-bottom:.7rem">
+                    ${t.story.split('\n\n').map(p => `<p style="font-size:.84rem;line-height:1.75;color:#444;margin-bottom:.5rem">${escapeHtml(p)}</p>`).join('')}
+                </div>
+                <div style="background:#eef7fd;border-radius:8px;padding:.75rem 1rem">
+                    <div style="font-size:.63rem;color:#007BB2;font-weight:700;text-transform:uppercase;margin-bottom:.25rem">Takeaway</div>
+                    <p style="font-size:.84rem;color:#333;line-height:1.7">${escapeHtml(t.takeaway)}</p>
+                </div>
+            </div>`;
+        }).join('<hr style="margin:1.5rem 0;border:none;border-top:1px solid #e5e5e5">');
+
+        const printWindow = window.open('', '_blank');
+        if (!printWindow) {
+            alert('Please allow popups to use the print feature.');
+            return;
+        }
+
+        const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>${escapeHtml(CONFIG.APP_TITLE)} — Print</title>
+    <style>
+        body { font-family: ${bFont}; max-width: 780px; margin: 0 auto; padding: 40px; color: #333; line-height: 1.6; }
+        h1 { font-family: ${hFont}; font-size: 1.35rem; border-bottom: 3px solid #007BB2; padding-bottom: 10px; margin-bottom: 18px; color: #007BB2; }
+        .print-instructions { font-size: .78rem; color: #888; font-style: italic; margin-bottom: 2rem; }
+        .footer { margin-top: 2.5rem; border-top: 1px solid #ddd; padding-top: 1rem; font-size: .72rem; color: #aaa; text-align: center; }
+        @media print { .print-instructions { display: none; } body { padding: 20px; } }
+    </style>
+</head>
+<body>
+    <h1>${escapeHtml(CONFIG.APP_TITLE)}</h1>
+    <div class="print-instructions">${escapeHtml(CONFIG.PRINT_INSTRUCTIONS)}</div>
+    ${contentHtml}
+    <div class="footer">Generated ${new Date().toLocaleString()}</div>
+    <script>
+        window.onload = function() {
+            setTimeout(function() { window.focus(); window.print(); }, 500);
+        };
+    <\/script>
+</body>
+</html>`;
+
+        printWindow.document.write(html);
+        printWindow.document.close();
+    }
+
+    /* -----------------------------------------------------------
+       escapeHtml — sanitises user / config content before innerHTML
+    ----------------------------------------------------------- */
+    function escapeHtml(text) {
+        if (!text) return '';
+        return String(text)
+            .replace(/&/g,  '&amp;')
+            .replace(/</g,  '&lt;')
+            .replace(/>/g,  '&gt;')
+            .replace(/"/g,  '&quot;')
+            .replace(/'/g,  '&#039;');
+    }
+
+    /* -----------------------------------------------------------
+       Initialisation
+    ----------------------------------------------------------- */
+    function init() {
+        applyConfig();
+        loadState();
+        buildWheel();
+        updateDots();
+
+        // Restore state if tips were seen in a previous session
+        if (seenTips.size > 0) {
+            setStatus();
+            if (CONFIG.SHOW_PRINT_BUTTON) document.getElementById('printBtn').style.display = 'inline-block';
+            if (seenTips.size >= N) {
+                // All tips already seen from a prior session — show Start Over only
+                document.getElementById('spinBtn').disabled = true;
+                document.getElementById('startOverBtn').style.display = 'block';
+                congratsShown = true; // don't re-fire congrats on dot clicks
+            }
+        } else {
+            setStatus('Spin to discover your first tip!');
+        }
+
+        // Spin button
+        document.getElementById('spinBtn').addEventListener('click', () => { unlockAudio(); doSpin(); });
+
+        // Wheel click / keyboard
+        document.getElementById('wheelSvg').classList.add('spinnable');
+        document.getElementById('wheelSvg').addEventListener('click', () => {
+            if (!spinning && tipViewed) { unlockAudio(); doSpin(); }
+        });
+        document.getElementById('wheelSvg').addEventListener('keydown', e => {
+            if ((e.key === 'Enter' || e.key === ' ') && !spinning && tipViewed) {
+                e.preventDefault(); unlockAudio(); doSpin();
+            }
+        });
+
+        // Modal
+        document.getElementById('modalX').addEventListener('click', closeModal);
+        document.getElementById('closeBtn').addEventListener('click', closeModal);
+        document.getElementById('modal').addEventListener('click', e => {
+            if (e.target === document.getElementById('modal')) closeModal();
+        });
+
+        // Takeaway toggle — reveals content, hides itself, shows Close
+        document.getElementById('takeawayToggle').addEventListener('click', () => {
+            document.getElementById('takeawayBox').classList.add('show');
+            document.getElementById('takeawayToggle').style.display = 'none';
+            document.getElementById('closeBtn').style.display = 'block';
+            setTimeout(() => document.getElementById('closeBtn').focus(), 50);
+        });
+
+        // Congrats
+        document.getElementById('continueBtn').addEventListener('click', hideCongrats);
+        document.getElementById('startOverBtn').addEventListener('click', resetAll);
+
+        // Print
+        document.getElementById('printBtn').addEventListener('click', printContent);
+
+        // Escape key closes modals
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') {
+                if (document.getElementById('modal').classList.contains('open')) closeModal();
+                if (document.getElementById('congratsOverlay').classList.contains('open')) hideCongrats();
+            }
+        });
+
+        notifyRiseHeight();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
