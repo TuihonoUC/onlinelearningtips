@@ -11,45 +11,45 @@
          Raleway, Roboto, Roboto Slab -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&amp;family=Merriweather:wght@400;700&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700;800;900&amp;display=swap" rel="stylesheet">
 
     <style>
         /* === CSS VARIABLES === */
         :root {
             /* Typography — change to match your Rise course theme */
-            --heading-font: 'Lato', sans-serif;
-            --body-font: 'Merriweather', serif;
+            --heading-font: 'Poppins', sans-serif;
+            --body-font: 'Poppins', sans-serif;
             --heading-size: 18pt;
             --body-size: 11pt;
 
             /* Colours */
-            --primary-color: #007BB2;
-            --primary-hover: #005f8a;
-            --text-color: #333333;
+            --primary-color: #CE3E2E;
+            --primary-hover: #A7000C;
+            --text-color: #212121;
             --bg-color: #ffffff;
 
             /* Wheel */
-            --wheel-ring-color: #1a2a3a;
-            --wheel-seg-a: #007BB2;
-            --wheel-seg-b: #1A9AD7;
-            --wheel-seg-seen: #7aafc7;
-            --wheel-seg-current: #e63946;
-            --wheel-hub-stroke: #007BB2;
+            --wheel-ring-color: #212121;
+            --wheel-seg-a: #CE3E2E;
+            --wheel-seg-b: #477A7E;
+            --wheel-seg-seen: #6B5D41;
+            --wheel-seg-current: #A7000C;
+            --wheel-hub-stroke: #CE3E2E;
 
             /* Indicator/pointer */
-            --pointer-color: #e63946;
+            --pointer-color: #A7000C;
 
             /* Card */
-            --card-accent: #007BB2;
+            --card-accent: #CE3E2E;
             --card-bg: #ffffff;
 
             /* Takeaway */
-            --takeaway-bg: #eef7fd;
-            --takeaway-border: #bee3f8;
+            --takeaway-bg: #FFF8F7;
+            --takeaway-border: #F18772;
 
             /* Status / tracker */
-            --dot-unseen-bg: #dde3ea;
-            --dot-unseen-text: #8899aa;
+            --dot-unseen-bg: #EAF7F8;
+            --dot-unseen-text: #477A7E;
         }
 
         /* === BASE RESET === */
@@ -71,6 +71,15 @@
             flex-direction: column;
             align-items: center;
             position: relative;
+        }
+
+        #app {
+            width: min(100%, 440px);
+            max-width: 440px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         /* === TYPOGRAPHY === */
@@ -109,18 +118,26 @@
             text-align: center;
             margin-bottom: 1.4rem;
             width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
         .block-title {
             font-family: var(--heading-font);
             font-size: 1.55rem;
-            font-weight: 900;
+            font-weight: 800;
+            line-height: 1.08;
             color: var(--primary-color);
             margin-bottom: .25rem;
+            text-align: center;
+            width: fit-content;
         }
         .block-subtitle {
             font-family: var(--heading-font);
             font-size: .88rem;
-            color: #666;
+            line-height: 1.45;
+            color: #6B5D41;
+            text-align: center;
         }
 
         /* === PRINT BUTTON (upper right) === */
@@ -184,20 +201,35 @@
             font-family: var(--heading-font);
             font-weight: 700;
             font-size: 1rem;
+            line-height: 1;
             background: var(--primary-color);
             color: #fff;
             border: none;
             border-radius: 2rem;
-            padding: .85rem 2.75rem;
+            padding: 0 2.75rem;
             cursor: pointer;
             min-height: 50px;
             min-width: 220px;
-            box-shadow: 0 4px 16px rgba(0, 123, 178, .32);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .45rem;
+            text-align: center;
+            box-shadow: 0 4px 16px rgba(206, 62, 46, .32);
             transition: background .2s, transform .1s;
         }
         #spinBtn:hover:not(:disabled) { background: var(--primary-hover); }
         #spinBtn:active:not(:disabled) { transform: translateY(1px); }
-        #spinBtn:disabled { background: #9bb8c9; cursor: not-allowed; box-shadow: none; }
+        #spinBtn:disabled { background: #C1E5E9; color: #315052; cursor: not-allowed; box-shadow: none; }
+        .spin-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            width: 18px;
+            height: 18px;
+            flex: 0 0 18px;
+        }
 
         /* === BUTTON STACK (spin + start over) === */
         .btn-stack {
@@ -307,7 +339,7 @@
             font-family: var(--heading-font);
             font-size: .98rem;
             font-weight: 700;
-            color: #1a2a3a;
+            color: #212121;
             margin-bottom: .22rem;
             line-height: 1.35;
         }
@@ -545,22 +577,33 @@
         <div class="pointer-wrap" id="pointerWrap" aria-hidden="true">
             <svg width="28" height="32" viewBox="0 0 28 32"
                  style="filter:drop-shadow(0 2px 4px rgba(0,0,0,.35))">
-                <polygon points="14,2 27,30 1,30" fill="#e63946" stroke="#fff" stroke-width="2.5"/>
+                <polygon points="1,2 27,2 14,30" fill="#A7000C" stroke="#fff" stroke-width="2.5"/>
             </svg>
         </div>
         <svg id="wheelSvg" viewBox="0 0 380 380" xmlns="http://www.w3.org/2000/svg"
              role="button" tabindex="0" aria-label="Spin the wheel">
-            <circle cx="190" cy="190" r="188" fill="#1a2a3a"/>
+            <circle cx="190" cy="190" r="188" fill="#212121"/>
             <g id="wheelG" style="transform-origin:190px 190px"></g>
-            <circle cx="190" cy="190" r="32" fill="#fff" stroke="#007BB2" stroke-width="3.5"/>
+            <circle cx="190" cy="190" r="32" fill="#fff" stroke="#CE3E2E" stroke-width="3.5"/>
             <text x="190" y="194" text-anchor="middle" dominant-baseline="middle"
-                  font-family="Lato,sans-serif" font-size="10" font-weight="700" fill="#007BB2">SPIN</text>
+                  font-family="Poppins,sans-serif" font-size="10" font-weight="700" fill="#CE3E2E">SPIN</text>
         </svg>
     </div>
 
     <!-- Spin button -->
     <div class="btn-stack">
-        <button id="spinBtn">🎯 Spin the Wheel</button>
+        <button id="spinBtn">
+            <span class="spin-icon" aria-hidden="true">
+                <svg width="18" height="18" viewBox="0 0 24 24" focusable="false">
+                    <circle cx="12" cy="12" r="8" fill="#ffffff"/>
+                    <circle cx="12" cy="12" r="5.1" fill="none" stroke="#CE3E2E" stroke-width="2"/>
+                    <circle cx="12" cy="12" r="1.8" fill="#CE3E2E"/>
+                    <path d="M15.3 8.7 21 3" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round"/>
+                    <path d="M18.4 3H21v2.6" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </span>
+            <span>Spin the Wheel</span>
+        </button>
         <button id="startOverBtn">Start Over</button>
     </div>
 
@@ -627,19 +670,19 @@
         APP_SUBTITLE: 'Spin to reveal a research-backed tip — click the card to read more.',
 
         // --- Typography — must match fonts loaded in <head> ---
-        HEADING_FONT: 'Lato',
-        BODY_FONT: 'Merriweather',
+        HEADING_FONT: 'Poppins',
+        BODY_FONT: 'Poppins',
 
         // --- Theme ---
-        PRIMARY_COLOR: '#007BB2',
-        PRIMARY_HOVER: '#005f8a',
+        PRIMARY_COLOR: '#CE3E2E',
+        PRIMARY_HOVER: '#A7000C',
 
         // --- Wheel colours ---
-        WHEEL_RING_COLOR: '#1a2a3a',       // outer ring
-        WHEEL_SEG_A: '#007BB2',             // alternating segment colour A
-        WHEEL_SEG_B: '#1A9AD7',             // alternating segment colour B
-        WHEEL_SEG_SEEN: '#7aafc7',          // colour of already-seen segments
-        WHEEL_SEG_CURRENT: '#e63946',       // colour of the currently landed segment
+        WHEEL_RING_COLOR: '#212121',        // outer ring
+        WHEEL_SEG_A: '#CE3E2E',             // UCO digital red
+        WHEEL_SEG_B: '#477A7E',             // accessible teal
+        WHEEL_SEG_SEEN: '#6B5D41',          // accessible gold/brown for already-seen segments
+        WHEEL_SEG_CURRENT: '#A7000C',       // dark red for the currently landed segment
 
         // --- Spin behaviour ---
         MAX_SPINS: 0,                       // 0 = unlimited; set e.g. 5 to cap at 5 spins
@@ -764,7 +807,7 @@
     function applyConfig() {
         const root = document.documentElement.style;
         root.setProperty('--heading-font',      `'${CONFIG.HEADING_FONT}', sans-serif`);
-        root.setProperty('--body-font',         `'${CONFIG.BODY_FONT}', serif`);
+        root.setProperty('--body-font',         `'${CONFIG.BODY_FONT}', sans-serif`);
         root.setProperty('--primary-color',     CONFIG.PRIMARY_COLOR);
         root.setProperty('--primary-hover',     CONFIG.PRIMARY_HOVER);
         root.setProperty('--wheel-ring-color',  CONFIG.WHEEL_RING_COLOR);
@@ -1193,7 +1236,7 @@
         const cc = document.getElementById('confettiCanvas');
         cc.width = window.innerWidth; cc.height = window.innerHeight;
         const pieces = [];
-        const clrs = [CONFIG.PRIMARY_COLOR, '#e63946', '#FFD700', '#4AADDB', '#2ecc71', '#ff6b35'];
+        const clrs = [CONFIG.PRIMARY_COLOR, '#A7000C', '#D0BF7D', '#6AC1C8', '#477A7E', '#F18772'];
         for (let i = 0; i < 140; i++) {
             pieces.push({
                 x: Math.random() * cc.width, y: -10 - Math.random() * 180,
@@ -1237,13 +1280,13 @@
         const contentHtml = arr.map(i => {
             const t = CONFIG.TIPS[i];
             return `<div style="margin-bottom:2rem;page-break-inside:avoid">
-                <div style="font-size:.7rem;color:#007BB2;font-weight:700;text-transform:uppercase;letter-spacing:.08em">TIP ${t.num}</div>
+                <div style="font-size:.7rem;color:#CE3E2E;font-weight:700;text-transform:uppercase;letter-spacing:.08em">TIP ${t.num}</div>
                 <h2 style="font-family:Arial,sans-serif;font-size:1.05rem;margin:.25rem 0 .7rem">${escapeHtml(t.headline)}</h2>
-                <div style="border-left:3px solid #dde3ea;padding-left:.9rem;margin-bottom:.7rem">
+                <div style="border-left:3px solid #F18772;padding-left:.9rem;margin-bottom:.7rem">
                     ${t.story.split('\n\n').map(p => `<p style="font-size:.84rem;line-height:1.75;color:#444;margin-bottom:.5rem">${escapeHtml(p)}</p>`).join('')}
                 </div>
-                <div style="background:#eef7fd;border-radius:8px;padding:.75rem 1rem">
-                    <div style="font-size:.63rem;color:#007BB2;font-weight:700;text-transform:uppercase;margin-bottom:.25rem">Takeaway</div>
+                <div style="background:#FFF8F7;border-radius:8px;padding:.75rem 1rem">
+                    <div style="font-size:.63rem;color:#CE3E2E;font-weight:700;text-transform:uppercase;margin-bottom:.25rem">Takeaway</div>
                     <p style="font-size:.84rem;color:#333;line-height:1.7">${escapeHtml(t.takeaway)}</p>
                 </div>
             </div>`;
@@ -1262,7 +1305,7 @@
     <title>${escapeHtml(CONFIG.APP_TITLE)} — Print</title>
     <style>
         body { font-family: ${bFont}; max-width: 780px; margin: 0 auto; padding: 40px; color: #333; line-height: 1.6; }
-        h1 { font-family: ${hFont}; font-size: 1.35rem; border-bottom: 3px solid #007BB2; padding-bottom: 10px; margin-bottom: 18px; color: #007BB2; }
+        h1 { font-family: ${hFont}; font-size: 1.35rem; border-bottom: 3px solid #CE3E2E; padding-bottom: 10px; margin-bottom: 18px; color: #CE3E2E; }
         .print-instructions { font-size: .78rem; color: #888; font-style: italic; margin-bottom: 2rem; }
         .footer { margin-top: 2.5rem; border-top: 1px solid #ddd; padding-top: 1rem; font-size: .72rem; color: #aaa; text-align: center; }
         @media print { .print-instructions { display: none; } body { padding: 20px; } }
