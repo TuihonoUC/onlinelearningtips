@@ -551,9 +551,19 @@
 
         /* === RESPONSIVE === */
         @media (max-width: 520px) {
+            body { padding-top: 1rem; }
             .wheel-wrap, #wheelSvg { width: 300px; height: 300px; }
             .block-title { font-size: 1.25rem; }
             #spinBtn { min-width: 180px; }
+
+            /* Keep Print Tips out of the heading area on small screens */
+            #printBtn {
+                position: static;
+                align-self: center;
+                margin: -0.55rem 0 1.25rem;
+                min-height: 40px;
+                padding: .45rem 1.15rem;
+            }
         }
         @media (max-width: 360px) {
             .wheel-wrap, #wheelSvg { width: 260px; height: 260px; }
@@ -563,14 +573,14 @@
 <body class="rise-body">
 <main id="app">
 
-    <!-- Print Tips — upper right, visible once first tip is seen -->
-    <button id="printBtn" aria-label="Print seen tips">Print Tips</button>
-
     <!-- Header -->
     <header class="block-header">
         <h1 class="block-title" id="appTitle">Spinner Wheel</h1>
         <p class="block-subtitle" id="appSubtitle">Spin to reveal a tip — click the card to read the full story.</p>
     </header>
+
+    <!-- Print Tips — upper right on desktop; below header on mobile -->
+    <button id="printBtn" aria-label="Print seen tips">Print Tips</button>
 
     <!-- Wheel -->
     <div class="wheel-wrap">
